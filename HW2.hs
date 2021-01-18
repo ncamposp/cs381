@@ -86,8 +86,12 @@ mapTree f (Node x h t) = Node(f x)  (mapTree f h) (mapTree f t)
 --   >>> valueAt [L,L,L] ex
 --   Nothing
 --
-valueAt :: [path] -> Tree a -> Int
-valueAt [_,_] t = 4
+valueAt :: Path -> Tree a -> Maybe a
+valueAt _ End = Nothing           ---Empty Tree
+valueAt [] (Node x l r) = Just x  ---Root
+valueAt (s:p) (Node x l r)
+                |s == L    = valueAt p l   ---recuisive case
+                |s == R    = valueAt p r
 
 
 -- | Find a path to a node that contains the given value.
@@ -107,5 +111,14 @@ valueAt [_,_] t = 4
 --   >>> pathTo 10 ex
 --   Nothing
 --
+tmap :: Step -> Maybe Path -> Maybe Path   ---auxiliary function
+tmap _ Nothing  = Nothing                  ---result in Nothing, if pathTo returns Nothing
+tmap s (Just p) = Just (s:p)               ---result in Just [...] if pathTo returns Just [...]
+
 pathTo :: Eq a => a -> Tree a -> Maybe Path
-pathTo = undefined
+pathTo _ End          = Nothing
+pathTo v (Node x l r) = case (v == x) of
+                           True  -> Just []
+                           False -> case (tmap L (pathTo v l)) == Nothing of
+                                       True  -> (tmap R (pathTo v r))
+                                       False -> (tmap L (pathTo v l))
