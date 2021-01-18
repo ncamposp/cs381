@@ -1,3 +1,8 @@
+--Group members:
+--Hayden Cole: 933185800
+--
+--
+
 -- Grading note: 10pts total
 --  * 2pts each for encodeList and mapTree
 --  * 3pts each for valueAt and pathTo
