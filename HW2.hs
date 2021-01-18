@@ -1,7 +1,7 @@
 --Group members:
 --Hayden Cole: 933185800
 --Noe Campos:  933185599
---
+--Name : OSU ID
 
 -- Grading note: 10pts total
 --  * 2pts each for encodeList and mapTree
@@ -40,7 +40,7 @@ ex = Node 4 (Node 3 (leaf 2) End)
 --   >>> encodeList []
 --   End
 --
---   >>> encodeList [1,2,3,4] 1:(2:3:4:[])
+--   >>> encodeList [1,2,3,4]
 --   Node 1 End (Node 2 End (Node 3 End (Node 4 End End)))
 --
 --   >>> encodeList ":-D"
