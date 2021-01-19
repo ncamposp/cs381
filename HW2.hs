@@ -1,7 +1,7 @@
 --Group members:
 --Hayden Cole: 933185800
 --Noe Campos:  933185599
---Name : OSU ID
+--Yun Han : 934322383
 
 -- Grading note: 10pts total
 --  * 2pts each for encodeList and mapTree
