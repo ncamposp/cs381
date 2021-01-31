@@ -1,7 +1,7 @@
--- Group members:
---  * Name, ID
---  * Name, ID
---  * Name, ID
+--Group members:
+--Hayden Cole: 933185800
+--Noe Campos:  933185599
+--Yun Han : 934322383
 --
 -- Grading note: 15pts total
 --  * 2pts Expr data type
@@ -24,31 +24,39 @@ import Data.List (intercalate)
 
 -- | Variable names.
 type Var = String
+--type int = Int
 
 -- | Expressions.
+-- expr	::=	var	variable reference
+-- |	int	literal integer
+-- |	expr + expr	addition
+-- |	expr * expr	multiplication
+-- |	( expr )	grouping
 data Expr
-   = ExprTODO  -- This is a dummy constructor that should be removed!
+  = Vari Var 
+   | Lit Int
+   | Add Expr Expr
+   | Mul Expr Expr
   deriving (Eq,Show)
-
 
 -- ** Examples
 
 -- | 2 + 3 * x
 expr1 :: Expr
-expr1 = undefined
+expr1 = Add (Lit 2) (Mul (Lit 3) (Vari "x"))
 
 -- | 2 + 3 * x + 4
 expr2 :: Expr
-expr2 = undefined
+expr2 = Mul (Add (Lit 2) (Lit 3)) (Add(Vari "x")(Lit 4))
 
 -- | (x + 2) * 3 * y
 expr3 :: Expr
-expr3 = undefined
+expr3 = Mul (Add (Vari "x") (Lit 2)) (Mul (Lit 3) (Vari "y"))
+--expr3 =   Mul (Mul (Add ((Vari "x") (Lit 2)) (Lit 3)) (Vari "y")
 
 -- | (x + 2) * (y + 3)
 expr4 :: Expr
-expr4 = undefined
-
+expr4 = Mul (Add(Vari "x")(Lit 2))   (Add (Vari "y") (Lit 3))
 
 -- ** Pretty printer
 
@@ -67,8 +75,14 @@ expr4 = undefined
 --   "(x + 2) * (y + 3)"
 --
 prettyExpr :: Expr -> String
-prettyExpr = undefined
+prettyExpr (Add l r) = prettyExpr l ++ "+"++ prettyExpr r
+prettyExpr (Mul l r) = prettyExpr l ++ "*"++ prettyExpr r
 
+prettyVari :: Var -> String
+prettyVari v = "" ++ v
+
+prettyLit :: Expr -> String
+prettyLit (Lit i) = show i
 
 --
 -- * Part 2: Commands
