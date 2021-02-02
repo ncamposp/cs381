@@ -105,7 +105,7 @@ data Mode = Down | Up
 
 -- | Commands.
 data Cmd
-   = Macr Args
+   = Macr Macro Args 
    | Move Expr Expr
    | Forloop Var Expr Expr Block
    | Pen Mode
@@ -127,8 +127,15 @@ data Cmd
 --     move(x, y)
 --   }
 --
+
 boxBody :: Block
-boxBody = [Pen Up, Move (Ref "x")(Ref "y"), Pen Down, ]
+boxBody = [Pen Up, 
+          Move (Vari "x")(Vari "y"), 
+          Pen Down, 
+          Move (Add (Vari "x")(Vari "w")) (Vari "y"), 
+          Move (Add (Vari "x")(Vari "w")) (Add (Vari "y") (Vari "h")),
+          Move (Vari "x") (Add (Vari "y") (Vari "h")),
+          Move (Vari "x") (Vari "y")]
 
 
 -- | The body of the main macro.
@@ -140,7 +147,7 @@ boxBody = [Pen Up, Move (Ref "x")(Ref "y"), Pen Down, ]
 --     }
 --   }
 mainBody :: Block
-mainBody = undefined
+mainBody = [Forloop "i" (Lit 1) (Lit 15) [Macr ("Box") [Vari "i", Vari "i", Vari "i", Vari "i"]   ]  ]
 
 
 -- ** Pretty printer
