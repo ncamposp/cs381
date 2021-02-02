@@ -1,4 +1,4 @@
---Group members:
+-- Group members:
 --Hayden Cole: 933185800
 --Noe Campos:  933185599
 --Yun Han : 934322383
@@ -45,9 +45,9 @@ data Expr
 expr1 :: Expr
 expr1 = Add (Lit 2) (Mul (Lit 3) (Vari "x"))
 
--- | 2 + 3 * x + 4
+-- | 2 + (3 * x) + 4
 expr2 :: Expr
-expr2 = Mul (Add (Lit 2) (Lit 3)) (Add(Vari "x")(Lit 4))
+expr2 = Add (Lit 2) (Add (Mul (Lit 3)(Vari "x")) (Lit 4))
 
 -- | (x + 2) * 3 * y
 expr3 :: Expr
@@ -75,14 +75,14 @@ expr4 = Mul (Add(Vari "x")(Lit 2))   (Add (Vari "y") (Lit 3))
 --   "(x + 2) * (y + 3)"
 --
 prettyExpr :: Expr -> String
-prettyExpr (Add l r) = prettyExpr l ++ "+"++ prettyExpr r
-prettyExpr (Mul l r) = prettyExpr l ++ "*"++ prettyExpr r
+prettyExpr (Vari v) = prettyVari v
+prettyExpr (Lit i) = show i 
+prettyExpr (Add l r) = "("++ prettyExpr l ++ "+"++ prettyExpr r ++ ")"
+prettyExpr (Mul l r) = "("++prettyExpr l ++ "*"++ prettyExpr r ++")"
 
 prettyVari :: Var -> String
 prettyVari v = "" ++ v
 
-prettyLit :: Expr -> String
-prettyLit (Lit i) = show i
 
 --
 -- * Part 2: Commands
@@ -105,7 +105,10 @@ data Mode = Down | Up
 
 -- | Commands.
 data Cmd
-   = CmdTODO  -- This is a dummy constructor that should be removed!
+   = Macr Args
+   | Move Expr Expr
+   | Forloop Var Expr Expr Block
+   | Pen Mode
   deriving (Eq,Show)
 
 
@@ -125,7 +128,7 @@ data Cmd
 --   }
 --
 boxBody :: Block
-boxBody = undefined
+boxBody = [Pen Up, Move (Ref "x")(Ref "y"), Pen Down, ]
 
 
 -- | The body of the main macro.
