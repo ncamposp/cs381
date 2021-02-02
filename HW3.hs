@@ -107,7 +107,7 @@ data Mode = Down | Up
 data Cmd
    = Macr Macro Args 
    | Move Expr Expr
-   | Forloop Var Expr Expr Block
+   | For Var Expr Expr Block
    | Pen Mode
   deriving (Eq,Show)
 
@@ -147,7 +147,7 @@ boxBody = [Pen Up,
 --     }
 --   }
 mainBody :: Block
-mainBody = [Forloop "i" (Lit 1) (Lit 15) [Macr ("Box") [Vari "i", Vari "i", Vari "i", Vari "i"]   ]  ]
+mainBody = [For "i" (Lit 1) (Lit 15) [Macr ("Box") [Vari "i", Vari "i", Vari "i", Vari "i"]   ]  ]
 
 
 -- ** Pretty printer
@@ -184,18 +184,23 @@ prettyMode Up   = "up"
 --   >>> prettyCmd (Pen Down)
 --   "pen down"
 --
---   >>> prettyCmd (Move (Lit 2) (Add (Ref "x") (Lit 3)))
+--   >>> prettyCmd (Move (Lit 2) (Add (Vari "x") (Lit 3)))
 --   "move(2, x + 3)"
 --
---   >>> prettyCmd (Call "foo" [Lit 2, (Mul (Ref "x") (Lit 3))])
+--   >>> prettyCmd (Call "foo" [Lit 2, (Mul (Vari "x") (Lit 3))])
 --   "foo(2, x * 3)"
 --
 --   >>> prettyCmd (For "i" (Lit 1) (Lit 10) [])
 --   "for i = 1 to 10 {}"
 --
-prettyCmd :: Cmd -> String
-prettyCmd = undefined
+prettyMacro :: Macro -> String
+prettyMacro m = "" ++ m
 
+prettyCmd :: Cmd -> String
+prettyCmd (Pen n) = "pen " ++ prettyMode n
+prettyCmd (Move x y) = "move(" ++ prettyExpr x ++ ", " ++ prettyExpr y ++")"
+prettyCmd (For w x y z) ="for " ++ prettyVari w ++ " = "++ prettyExpr x ++ " to "++ prettyExpr y ++ " " ++ prettyBlock z
+prettyCmd (Macr a _ ) = prettyMacro a
 
 -- | Pretty print a block of commands.
 --
