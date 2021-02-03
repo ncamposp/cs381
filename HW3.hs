@@ -86,8 +86,7 @@ prettyExpr (Mul l r) = case l of
                           (Add _ _)  -> prettyExpr l ++ " * " ++ "(" ++ prettyExpr r ++ ")"
                           otherwise  -> prettyExpr l ++ " * " ++ prettyExpr r
 
-prettyVari :: Var -> String
-prettyVari v = "" ++ v
+
 
 --
 -- * Part 2: Commands
@@ -199,14 +198,13 @@ prettyMode Up   = "up"
 --   >>> prettyCmd (For "i" (Lit 1) (Lit 10) [])
 --   "for i = 1 to 10 {}"
 --
-prettyMacro :: Macro -> String
-prettyMacro m = "" ++ m
+
 
 prettyCmd :: Cmd -> String
 prettyCmd (Pen n) = "pen " ++ prettyMode n
 prettyCmd (Move x y) = "move(" ++ prettyExpr x ++ ", " ++ prettyExpr y ++")"
-prettyCmd (For w x y z) ="for " ++ prettyVari w ++ " = "++ prettyExpr x ++ " to "++ prettyExpr y ++ " " ++ prettyBlock z
-prettyCmd (Macr m a) = prettyMacro m ++ "(" ++ (Data.List.intercalate ", " (map prettyExpr a)) ++ ")"
+prettyCmd (For w x y z) ="for " ++ w ++ " = "++ prettyExpr x ++ " to "++ prettyExpr y ++ " " ++ prettyBlock z
+prettyCmd (Macr m a) = m ++ "(" ++ (Data.List.intercalate ", " (map prettyExpr a)) ++ ")"
 
 -- | Pretty print a block of commands.
 --
