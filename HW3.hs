@@ -75,14 +75,19 @@ expr4 = Mul (Add(Vari "x")(Lit 2))   (Add (Vari "y") (Lit 3))
 --   "(x + 2) * (y + 3)"
 --
 prettyExpr :: Expr -> String
-prettyExpr (Vari v) = prettyVari v
+prettyExpr (Vari v) = v
 prettyExpr (Lit i) = show i 
-prettyExpr (Add l r) = "("++ prettyExpr l ++ "+"++ prettyExpr r ++ ")"
-prettyExpr (Mul l r) = "("++prettyExpr l ++ "*"++ prettyExpr r ++")"
+prettyExpr (Add l r) = prettyExpr l ++ " + "++ prettyExpr r 
+prettyExpr (Mul l r) = case l of 
+                  (Add _ _ ) -> case r of
+                          (Add _ _)  -> "(" ++ prettyExpr l ++ ")" ++ " * " ++ "(" ++ prettyExpr r ++ ")"
+                          otherwise  -> "(" ++ prettyExpr l ++ ")" ++ " * " ++ prettyExpr r
+                  otherwise -> case r of
+                          (Add _ _)  -> prettyExpr l ++ " * " ++ "(" ++ prettyExpr r ++ ")"
+                          otherwise  -> prettyExpr l ++ " * " ++ prettyExpr r
 
 prettyVari :: Var -> String
 prettyVari v = "" ++ v
-
 
 --
 -- * Part 2: Commands
@@ -147,7 +152,8 @@ boxBody = [Pen Up,
 --     }
 --   }
 mainBody :: Block
-mainBody = [For "i" (Lit 1) (Lit 15) [Macr ("Box") [Vari "i", Vari "i", Vari "i", Vari "i"]   ]  ]
+mainBody = [For "i" (Lit 1) (Lit 15) 
+          [Macr "box" [Vari "i", Vari "i", Vari "i", Vari "i"]   ]  ]
 
 
 -- ** Pretty printer
@@ -187,7 +193,7 @@ prettyMode Up   = "up"
 --   >>> prettyCmd (Move (Lit 2) (Add (Vari "x") (Lit 3)))
 --   "move(2, x + 3)"
 --
---   >>> prettyCmd (Call "foo" [Lit 2, (Mul (Vari "x") (Lit 3))])
+--   >>> prettyCmd (Macr "foo" [Lit 2, (Mul (Vari "x") (Lit 3))])
 --   "foo(2, x * 3)"
 --
 --   >>> prettyCmd (For "i" (Lit 1) (Lit 10) [])
@@ -200,7 +206,7 @@ prettyCmd :: Cmd -> String
 prettyCmd (Pen n) = "pen " ++ prettyMode n
 prettyCmd (Move x y) = "move(" ++ prettyExpr x ++ ", " ++ prettyExpr y ++")"
 prettyCmd (For w x y z) ="for " ++ prettyVari w ++ " = "++ prettyExpr x ++ " to "++ prettyExpr y ++ " " ++ prettyBlock z
-prettyCmd (Macr a _ ) = prettyMacro a
+prettyCmd (Macr m a) = prettyMacro m ++ "(" ++ (Data.List.intercalate ", " (map prettyExpr a)) ++ ")"
 
 -- | Pretty print a block of commands.
 --
@@ -258,7 +264,7 @@ data Prog = Program [Def] Block
 --   }
 --
 boxes :: Prog
-boxes = undefined
+boxes = Program [Define "box" ["x","y","w","h"] boxBody] mainBody
 
 
 -- | Pretty print a macro definition.
