@@ -38,28 +38,6 @@ type Prog = Block
 
 
 --
--- * Points, lines, and pen state.
--- 
-
--- These definitions are used in the semantics of MiniMiniLogo.
-
-
--- | A point is a cartesian pair (x,y).
-type Point = (Int, Int)
-
--- | A line is defined by its endpoints.
-type Line = (Point, Point)
-
--- | The state of the pen, which includes whether it is up or down and its
---   current location.
-type State = (Mode, Point)
-
--- | The initial state of the pen.
-initPen :: State
-initPen = (Up, (0,0))
-
-
---
 -- * Pretty printing
 --
 

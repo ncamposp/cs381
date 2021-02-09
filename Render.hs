@@ -4,15 +4,29 @@
 --
 --   NOTE: You should not change the definitions in this file!
 --
-module Render (toHTML,toGridHTML) where
+module Render (Point,Line,toHTML,toGridHTML) where
 
 import Data.List (intercalate)
-import MiniMiniLogo (Point,Line)
 
 
 --
 -- * Public interface
 --
+
+-- ** Points, lines, and pen state.
+
+-- These definitions are used in the semantics of MiniMiniLogo.
+
+
+-- | A point is a cartesian pair (x,y).
+type Point = (Int, Int)
+
+-- | A line is defined by its endpoints.
+type Line = (Point, Point)
+
+
+-- ** Drawing functions
+
 
 -- | Output a list of lines as an HTML5 file containing an SVG image.
 toHTML :: [Line] -> IO ()
