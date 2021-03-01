@@ -1,7 +1,6 @@
 -- Group members:
---Hayden Cole: 933185800
---Noe Campos:  933185599
 --Yun Han : 934322383
+--Noe Campos:  933185599
 --
 -- Grading notes: 15pts total
 --  * 2pts checkExpr
@@ -91,7 +90,14 @@ check (Program defs main) =
 --   False
 --
 checkExpr :: [Var] -> Expr -> Bool
-checkExpr = undefined
+checkExpr [] (Lit i)       = True 
+checkExpr [] (Ref v)       = False 
+checkExpr [] (Add l r)     = checkExpr [] l && checkExpr [] r
+checkExpr [] (Mul l r)     = checkExpr [] l && checkExpr [] r
+checkExpr v  (Lit i)       = True
+checkExpr v  (Ref v')      = elem v' v
+checkExpr v  (Add l r)     = checkExpr v l && checkExpr v r
+checkExpr v  (Mul l r)     = checkExpr v l && checkExpr v r
 
 
 
@@ -150,8 +156,25 @@ checkExpr = undefined
 --   >>> checkCmd [("f",1)] ["x","y"] (For "z" exprXY exprXY [Pen Up, Call "f" [exprXZ]])
 --   True
 --
+
+helpfunc1 :: Map Macro Int -> [Macro]
+helpfunc1 []         = []
+helpfunc1 ((ma,_):t) = ma: (helpfunc1 t)
+
 checkCmd :: Map Macro Int -> [Var] -> Cmd -> Bool
-checkCmd = undefined
+checkCmd _ _ (Pen _)             = True
+checkCmd _ v (Move e1 e2)        = (checkExpr v e1) && (checkExpr v e2)
+checkCmd [] _ (Call _ _)         = False
+checkCmd ma v (Call ma' ag)      = case (all (checkExpr v) ag) of 
+                                       True -> case (elem ma' (helpfunc1 ma)) of
+                                                 True  -> (get ma' ma) == Just (length ag)
+                                                 False -> False
+                                       False -> False
+checkCmd ma v (For v' e1 e2 b)    = (checkExpr (v':v) e1) && (checkExpr (v':v) e2)
+                                          && (all (checkCmd ma (v':v)) b)
+
+
+
 
 
 
@@ -179,7 +202,7 @@ checkCmd = undefined
 --   True
 --
 checkBlock :: Map Macro Int -> [Var] -> Block -> Bool
-checkBlock = undefined
+checkBlock m v b = all (checkCmd m v) b
 
 
 
@@ -204,7 +227,9 @@ checkBlock = undefined
 --   True
 --
 checkDef :: Map Macro Int -> Def -> Bool
-checkDef = undefined
+checkDef ma (Define _ ps b) = all (checkCmd ma ps) b
+
+
 
 
 
@@ -289,7 +314,10 @@ draw p | check p   = toHTML (prog p)
 --   39
 --
 expr :: Env -> Expr -> Int
-expr = undefined
+expr _ (Lit i)    = i
+expr ev (Ref v)   = getOrFail v ev
+expr ev (Add l r) = (expr ev l) + (expr ev r)
+expr ev (Mul l r) = (expr ev l) * (expr ev r)
 
 
 
@@ -326,15 +354,25 @@ expr = undefined
 --   >>> cmd ms vs (Down,(0,0)) (For "i" (Ref "x") (Lit 1) [Call "line" [Ref "i", Ref "i", Mul (Ref "x") (Ref "i"), Mul (Ref "y") (Ref "i")]])
 --   ((Down,(3,4)),[((3,3),(9,12)),((2,2),(6,8)),((1,1),(3,4))])
 --
+
+helpfunc2 :: Macros -> [Macro]
+helpfunc2 ((ma,_):t) = ma: (helpfunc2 t)
+
 cmd :: Macros -> Env -> State -> Cmd -> (State, [Line])
 cmd defs env state@(pen,pos) c = case c of
 
-    Pen Up   -> undefined
-    Pen Down -> undefined
+    Pen Up   -> ((Up,pos),[])
+    Pen Down -> ((Down,pos),[])
 
-    Move xExp yExp -> undefined
+    Move xExp yExp -> if pen == Down then ((Down,(expr env xExp, expr env yExp)),[(pos,(expr env xExp, expr env yExp))]) 
+                                     else ((Up,(expr env xExp, expr env yExp)),[])
 
-    Call macro args -> undefined
+    Call macro args -> case (elem macro (helpfunc2 defs)) && macro == "line" of
+                           True -> case pen of
+                                     Down -> ((Down,((expr env (args!!2)),(expr env (args!!3)))),[(((expr env (args!!0)),(expr env (args!!1))),((expr env (args!!2)),(expr env (args!!3))))])
+                                     Up   -> ((Up,((expr env (args!!2)),(expr env (args!!3)))),[])
+                           False -> ((pen,pos),[])
+
 
     For v fromExp toExp body ->
 
@@ -347,10 +385,11 @@ cmd defs env state@(pen,pos) c = case c of
           -- and fill in the undefined part that runs the body of the loop.
           loopStep :: (State, [Line]) -> Int -> (State, [Line])
           loopStep (s, ls) i =
-            let (s', ls') = undefined
+            let (s', ls') = block defs env s body
             in (s', ls ++ ls')
 
       in foldl loopStep (state, []) ixs
+       -- foldl loopStep (loopStep (state,[]) (head ixs)) (tail ixs)
 
 
 
@@ -384,7 +423,18 @@ prog (Program defs main) = snd $ block (map entry defs) [] initPen main
 --
 -- * Amazing picture (extra credit)
 --
+radi :: Def
+radi = Define "radi" ["x","y"]
+    [ Pen Down
+    , Move (Ref "x") (Ref "y")
+    , Pen Up
+    , Move (Lit 10) (Lit 10)
+    ]
 
 -- | A MiniLogo program that draws your amazing picture.
 amazing :: Prog
-amazing = undefined
+amazing = Program [radi] [Pen Up,
+                          Move (Lit 10)(Lit 10), 
+                          For "z" (Lit 5) (Lit 15) 
+                          [Call "radi" [Mul (Ref "z")(Lit 2), Add (Ref "z")(Lit (-3))]]]
+
