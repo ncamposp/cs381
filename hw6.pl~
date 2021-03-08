@@ -83,7 +83,7 @@ example(P) :-
         "the answer is" ].       % ["the answer is", 6, "whew!"]
 
 % 1. Define the predicate `cmd/3`.
-%cmd(Command, stack1, stack2) :-
+
 
 % 2. Define the predicate `prog/3`.
 %
